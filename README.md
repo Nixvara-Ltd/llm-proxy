@@ -13,6 +13,8 @@ While the proxy runs in the background, a beautiful Terminal UI (TUI) provides a
 - **Prompt Inspect Mode**: Agents often hide their system prompts. This proxy intercepts and displays the exact prompts being sent to the LLM in real-time on your dashboard.
 - **Cross-Platform**: Built in Rust, this runs natively on Mac, Linux, and Windows.
 
+![LLM Proxy Dashboard](screenshot.png)
+
 ---
 
 ## Setup & Execution
@@ -20,9 +22,15 @@ While the proxy runs in the background, a beautiful Terminal UI (TUI) provides a
 ### Prerequisites
 - **Rust**: Ensure you have Rust installed via `rustup`.
 - **C/C++ Build Tools**: Required for compiling the local SQLite database driver (`rusqlite`).
-  - **Mac**: Automatically installed with Xcode Command Line Tools.
-  - **Windows**: Install the standard Visual Studio C++ Build Tools (usually bundled with the Rust MSVC installer).
+  - **Mac**: Automatically installed with Xcode Command Line Tools (`xcode-select --install`).
   - **Linux**: Install `build-essential` or `gcc`.
+  
+#### Detailed Windows Setup
+Because this project compiles a local SQLite database, Windows requires the C++ Build Tools:
+1. Download and run **`rustup-init.exe`** from [rustup.rs](https://rustup.rs/).
+2. If you don't have the C++ Build Tools installed, `rustup-init` will usually prompt you to install them automatically. Type `1` to proceed.
+3. **Manual C++ Tools Installation (if needed):** Download the [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). Run the installer, select the **"Desktop development with C++"** workload, and click Install.
+4. Open a fresh PowerShell or Windows Terminal window to ensure your `PATH` is updated.
 
 ### Configuration
 API keys are injected directly from your environment variables. Ensure the following are set in your terminal profile or a local `.env` file before running:
