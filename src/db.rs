@@ -44,6 +44,14 @@ impl DbStore {
             [],
         )?;
 
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )",
+            [],
+        )?;
+
         Ok(())
     }
 
@@ -107,7 +115,35 @@ impl DbStore {
         }
     }
 
+    pub fn set_setting(&self, key: &str, value: &str) -> anyhow::Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT INTO settings (key, value) VALUES (?1, ?2)
+             ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+            [key, value],
+        )?;
+        Ok(())
+    }
+
+    pub fn get_setting(&self, key: &str) -> anyhow::Result<Option<String>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT value FROM settings WHERE key = ?1")?;
+        let mut rows = stmt.query([key])?;
+        if let Some(row) = rows.next()? {
+            let value: String = row.get(0)?;
+            Ok(Some(value))
+        } else {
+            Ok(None)
+        }
+    }
+
     pub fn get_daily_limit(&self) -> anyhow::Result<f64> {
-        Ok(5.0) // Hardcoded to $5 for Phase 3
+        let limit_str = self.get_setting("daily_limit")?.unwrap_or_else(|| "5.0".to_string());
+        let limit = limit_str.parse::<f64>().unwrap_or(5.0);
+        Ok(limit)
+    }
+
+    pub fn set_daily_limit(&self, limit: f64) -> anyhow::Result<()> {
+        self.set_setting("daily_limit", &limit.to_string())
     }
 }
